@@ -51,17 +51,22 @@ limits: { cpus: "1.5", memory: 3g }
 El render será más lento que en local, pero Resia/Gastos no se quedan sin CPU.
 Si ves que igual sufre producción, bájalo a `cpus: "1.0"` y `memory: 2g`.
 
-## 5. 🔒 Auth — EL WEBUI NO TIENE LOGIN
+## 5. 🔒 Auth — Cloudflare Access (DECIDIDO)
 
-Si lo expones tal cual, cualquiera usa tu Cerebras/Pexels. Elegir UNA:
+El WebUI Streamlit no tiene login. Lo protegemos con Cloudflare Access (Zero Trust, gratis ≤50 users).
 
-- **Cloudflare Access (recomendado)** — ya usas Cloudflare. Zero Trust gratis (≤50 users):
-  1. Cloudflare → Zero Trust → Access → Applications → Add → Self-hosted.
-  2. Subdominio `mpt.resia.cloud`, política: email OTP a tu correo (+ del equipo Resia).
-  3. ⚠️ El record `mpt.resia.cloud` debe estar **proxied (naranja)**, no "DNS only".
-     Tu wildcard sigue DNS-only; este subdominio puntual proxied no lo rompe (SSL Full).
-- **No exponerlo** — sin Domain en Coolify; accedes por túnel SSH cuando lo necesites.
-- **Basic Auth Traefik** — frágil en Coolify v4 (regenera labels). No recomendado.
+**Paso a paso (tu setup actual: wildcard `*.resia.cloud` DNS-only + Traefik DNS-01):**
+
+1. **DNS** — Cloudflare → DNS → crear record explícito (gana sobre el wildcard):
+   - Tipo `A`, nombre `mpt`, contenido `2.24.29.149`, **Proxy ON (nube naranja)**.
+   - ⚠️ Este es el ÚNICO proxied; tu wildcard sigue "DNS only" intacto.
+2. **SSL/TLS** — modo de la zona en **Full (strict)** (Traefik ya tiene cert válido del wildcard que cubre `mpt.resia.cloud` vía Let's Encrypt DNS-01). Cloudflare valida el cert de origen → OK.
+3. **Coolify** — en la Application, Domains = `https://mpt.resia.cloud`. Traefik enruta por Host. (WebSockets de Streamlit pasan por el proxy de Cloudflare sin config extra.)
+4. **Zero Trust → Access → Applications → Add an application → Self-hosted:**
+   - Application domain: `mpt.resia.cloud`
+   - Policy: `Allow`, Include → Emails → tu correo (+ equipo Resia).
+   - Auth method: **One-time PIN** (email OTP) — no necesitas IdP.
+5. Probar: entrar a `https://mpt.resia.cloud` → Cloudflare pide email → llega PIN → entra al WebUI.
 
 ## 6. Build — ojo con los mirrors chinos
 
