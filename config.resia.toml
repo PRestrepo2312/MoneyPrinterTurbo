@@ -1,0 +1,54 @@
+# =====================================================================
+# config.toml para Resia — pegar este contenido en Coolify como File Mount
+# en la ruta /MoneyPrinterTurbo/config.toml
+#
+# SOLO necesitas llenar 2 cosas:
+#   1) pexels_api_keys  -> registrarte en https://www.pexels.com/api/ (gratis)
+#   2) openai_api_key   -> tu key de Cerebras (https://cloud.cerebras.ai/)
+# =====================================================================
+
+[app]
+video_source = "pexels"
+hide_config = false
+edge_tts_timeout = 30
+tls_verify = true
+
+# 1) PEXELS — pega tu key aquí entre comillas. Ej: ["abc123..."]
+pexels_api_keys = []
+pixabay_api_keys = []
+
+# --- LLM: reusamos Cerebras (OpenAI-compatible, $0 extra) ---
+llm_provider = "openai"
+openai_base_url = "https://api.cerebras.ai/v1"
+# 2) CEREBRAS — pega tu key aquí
+openai_api_key = ""
+openai_model_name = "gpt-oss-120b"
+
+# Subtítulos con Edge TTS (gratis, voces en español)
+subtitle_provider = "edge"
+
+# VPS apretado: 1 render a la vez para no clavar el CPU
+max_concurrent_tasks = 1
+max_queued_tasks = 20
+
+material_directory = ""
+enable_redis = false
+
+[whisper]
+model_size = "large-v3"
+device = "CPU"
+compute_type = "int8"
+
+[proxy]
+
+[azure]
+speech_key = ""
+speech_region = ""
+
+[siliconflow]
+api_key = ""
+
+[ui]
+hide_log = false
+# Subtítulos abajo, estilo Reels
+subtitle_position = "bottom"

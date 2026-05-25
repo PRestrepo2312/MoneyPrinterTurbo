@@ -1,0 +1,40 @@
+# docker-compose para Coolify (VPS Hostinger srv1574889, 7.8 GB RAM compartidos
+# con Coolify + App Gastos + Resia). Tuneado para NO matar producción:
+#   - Solo el servicio webui (la API queda fuera para ahorrar RAM)
+#   - Límites duros de CPU/RAM
+#   - Flags de Streamlit compatibles con proxy inverso (Traefik de Coolify)
+#
+# Persistencia (configurar en Coolify -> Storages, NO aquí):
+#   - File mount : /MoneyPrinterTurbo/config.toml   (contenido = config.resia.toml, con las keys)
+#   - Volume     : /MoneyPrinterTurbo/storage       (videos generados + cache de clips)
+#
+# Auth: el WebUI NO tiene login. Protégelo a nivel de red (ver RESIA_DEPLOY.md).
+
+services:
+  webui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "moneyprinterturbo-webui"
+    command:
+      - "streamlit"
+      - "run"
+      - "./webui/Main.py"
+      - "--server.address=0.0.0.0"
+      - "--server.port=8501"
+      - "--server.headless=true"
+      - "--server.enableCORS=false"
+      - "--server.enableXsrfProtection=false"
+      - "--browser.gatherUsageStats=false"
+    ports:
+      - "8501"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Camisa de fuerza: máximo 1.5 cores y 3 GB para no asfixiar a Resia/Gastos.
+          # El render será más lento, pero la producción no se cae.
+          cpus: "1.5"
+          memory: 3g
+        reservations:
+          memory: 512m
