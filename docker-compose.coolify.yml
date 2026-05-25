@@ -19,15 +19,15 @@ services:
     # Las keys llegan como Environment Variables de Coolify y se inyectan al
     # config.toml en el arranque (así no van en git ni quedan en la UI pública).
     environment:
-      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PEXELS_API_KEY=${PEXELS_API_KEY}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         set -e
         cp -f config.resia.toml config.toml
-        if [ -n "$$CEREBRAS_API_KEY" ]; then
-          sed -i "s|^openai_api_key = .*|openai_api_key = \"$$CEREBRAS_API_KEY\"|" config.toml
+        if [ -n "$$OPENAI_API_KEY" ]; then
+          sed -i "s|^openai_api_key = .*|openai_api_key = \"$$OPENAI_API_KEY\"|" config.toml
         fi
         if [ -n "$$PEXELS_API_KEY" ]; then
           sed -i "s|^pexels_api_keys = .*|pexels_api_keys = [\"$$PEXELS_API_KEY\"]|" config.toml
